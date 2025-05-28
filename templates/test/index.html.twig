@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Habitats du Zoo Arcadia{% endblock %}
+
+{% block body %}
+    <h1>Habitats du Zoo Arcadia</h1>
+
+    {% for habitat in habitats %}
+        <h2>{{ habitat.name }}</h2>
+        <p>{{ habitat.description }}</p>
+        {% if habitat.images %}
+            {% for image in habitat.images %}
+                <img src="{{ asset(image) }}" alt="{{ habitat.name }}" style="max-width: 200px;">
+            {% endfor %}
+        {% endif %}
+
+        <h3>Animaux dans cet habitat</h3>
+        <ul>
+            {% for animal in habitat.animals %}
+                <li>
+                    {{ animal.name }} ({{ animal.breed }})
+                    {% if animal.images %}
+                        {% for image in animal.images %}
+                            <img src="{{ asset(image) }}" alt="{{ animal.name }}" style="max-width: 100px;">
+                        {% endfor %}
+                    {% endif %}
+                </li>
+            {% else %}
+                <li>Aucun animal dans cet habitat.</li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock %}

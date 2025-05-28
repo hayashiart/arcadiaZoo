@@ -1,0 +1,31 @@
+security:
+    password_hashers:
+        App\Entity\User:
+            algorithm: bcrypt
+    providers:
+        users:
+            entity:
+                class: App\Entity\User
+                property: email
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            lazy: true
+            provider: users
+            # Changement : configuration explicite de l'authentificateur
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+                default_target_path: app_dashboard
+            logout:
+                path: app_logout
+                target: app_home
+    # Changement : règles d'accès simplifiées
+    access_control:
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+        - { path: ^/contact$, roles: PUBLIC_ACCESS }
+        - { path: ^/dashboard$, roles: [ROLE_ADMIN, ROLE_VET, ROLE_EMPLOYEE] }

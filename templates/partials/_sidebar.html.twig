@@ -1,0 +1,95 @@
+<!-- Sidebar chargé correctement -->
+<div style="width: 250px; background-color: white; padding: 20px; border-radius: 5px; margin-right: 20px;">
+    <h3 style="font-family: 'Belanosima', sans-serif; font-size: 20px; color: #333; margin: 0 0 20px;">Actions</h3>
+    <ul style="list-style: none; padding: 0;">
+        {% if is_granted('ROLE_ADMIN') %}
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_home') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/homepage.png') }}" alt="Homepage" style="height: 24px; margin-right: 10px;"> Homepage
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_dashboard') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/dashboard.png') }}" alt="Dashboard" style="height: 24px; margin-right: 10px;"> Dashboard
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_users') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/users.png') }}" alt="Users" style="height: 24px; margin-right: 10px;"> Users
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_services') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/services.png') }}" alt="Services" style="height: 24px; margin-right: 10px;"> Services
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_habitats') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/habitat.png') }}" alt="Habitats" style="height: 24px; margin-right: 10px;"> Habitats
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_animals') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/animals.png') }}" alt="Animaux" style="height: 24px; margin-right: 10px;"> Animaux
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_habitat_comments') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/Habitatcomment.png') }}" alt="Habitat Comments" style="height: 24px; margin-right: 10px;"> Habitat Comments
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_feeding') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/feedinglog.png') }}" alt="Alimentation" style="height: 24px; margin-right: 10px;"> Alimentation
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+    <a href="{{ path('app_schedule') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+        <img src="{{ asset('images/png/schedule.png') }}" alt="Horaires" style="height: 24px; margin-right: 10px;"> Horaires
+    </a>
+</li>
+            <li style="margin-bottom: 15px;">
+    <a href="{{ path('app_report') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+        <img src="{{ asset('images/png/reports.png') }}" alt="Compte-rendus" style="height: 24px; margin-right: 10px;"> Compte-rendus
+    </a>
+</li>
+            <li style="margin-bottom: 15px;">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/contacts.png') }}" alt="Contacts" style="height: 24px; margin-right: 10px;"> Contacts
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/avis.png') }}" alt="Avis" style="height: 24px; margin-right: 10px;"> Avis
+                </a>
+            </li>
+        {% elseif is_granted('ROLE_VET') %}
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_habitat_comments') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/Habitatcomment.png') }}" alt="Habitat Comments" style="height: 24px; margin-right: 10px;"> Habitat Comments
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+    <a href="{{ path('app_report') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+        <img src="{{ asset('images/png/reports.png') }}" alt="Compte-rendus" style="height: 24px; margin-right: 10px;"> Compte-rendus
+    </a>
+</li>
+        {% elseif is_granted('ROLE_EMPLOYEE') %}
+            <li style="margin-bottom: 15px;">
+                <a href="{{ path('app_feeding') }}" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/feedinglog.png') }}" alt="Alimentation" style="height: 24px; margin-right: 10px;"> Alimentation
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/contacts.png') }}" alt="Contacts" style="height: 24px; margin-right: 10px;"> Contacts
+                </a>
+            </li>
+            <li style="margin-bottom: 15px;">
+                <a href="#" style="text-decoration: none; display: flex; align-items: center; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">
+                    <img src="{{ asset('images/png/avis.png') }}" alt="Avis" style="height: 24px; margin-right: 10px;"> Avis
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</div>

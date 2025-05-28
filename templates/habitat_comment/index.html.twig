@@ -1,0 +1,123 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des commentaires d'habitats - Arcadia Administration{% endblock %}
+
+{% block body %}
+    <div style="background-color: #E7EDEE; min-height: 100vh; padding: 40px; display: flex;">
+        {{ include('partials/_sidebar.html.twig') }}
+        <div style="flex: 1; background-color: white; padding: 20px; border-radius: 5px;">
+            <h2 style="font-family: 'Belanosima', sans-serif; font-size: 24px; color: #333;">Commentaires des habitats</h2>
+            {% for message in app.flashes('success') %}
+                <p style="color: green; font-family: 'Belanosima', sans-serif; font-size: 16px;">{{ message }}</p>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <p style="color: red; font-family: 'Belanosima', sans-serif; font-size: 16px;">{{ message }}</p>
+            {% endfor %}
+            {% if is_granted('ROLE_VET') %}
+                <button onclick="openAddCommentModal()" style="background-color: #73946B; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer; margin-bottom: 20px;">Ajouter un commentaire</button>
+            {% endif %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">ID</th>
+                        <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Habitat</th>
+                        <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Commentaire</th>
+                        <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Date</th>
+                        <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Vétérinaire</th>
+                        {% if is_granted('ROLE_VET') %}
+                            <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comment in comments %}
+                        <tr>
+                            <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ comment.id }}</td>
+                            <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ habitat_map[comment.habitat.id] ?? 'Inconnu' }}</td>
+                            <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ comment.comment }}</td>
+                            <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ comment.createdAt|date('d/m/Y H:i') }}</td>
+                            <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ comment.vet.email }}</td>
+                            {% if is_granted('ROLE_VET') %}
+                                <td style="padding: 10px; border-bottom: 1px solid #ccc;">
+                                    <div style="position: relative; display: inline-block;">
+                                        <button type="button" onclick="toggleDropdown({{ comment.id }})" style="background: none; border: none; cursor: pointer; font-size: 18px;">...</button>
+                                        <div id="dropdown-{{ comment.id }}" style="display: none; position: absolute; right: 0; background-color: white; border: 1px solid #ccc; border-radius: 5px; z-index: 1; min-width: 100px;">
+                                            <a href="#" onclick="openEditCommentModal({{ comment.id }}, {{ comment.habitat.id }}, '{{ comment.comment|escape('js') }}')" style="display: block; padding: 8px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; text-decoration: none;">Modifier</a>
+                                            <form action="{{ path('app_habitat_comment_delete', {'id': comment.id}) }}" method="post" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer ce commentaire ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                                <button type="submit" style="display: block; padding: 8px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; background: none; border: none; cursor: pointer; width: 100%; text-align: left;">Supprimer</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if is_granted('ROLE_VET') %}
+        <!-- Popup pour ajouter/modifier un commentaire -->
+        <div id="commentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="background-color: white; width: 400px; margin: 100px auto; padding: 20px; border-radius: 5px;">
+                <h3 id="modalTitle" style="font-family: 'Belanosima', sans-serif; font-size: 20px; color: #333;">Ajouter un commentaire</h3>
+                <form id="commentForm" method="post">
+                    <input type="hidden" name="comment_id" id="commentId">
+                    <div style="margin-bottom: 15px;">
+                        <label for="habitat_id" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Habitat :</label>
+                        <select id="habitat_id" name="habitat_id" required style="width: 100%; padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+                            {% for habitatId, habitatName in habitat_map %}
+                                <option value="{{ habitatId }}">{{ habitatName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="comment" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Commentaire :</label>
+                        <textarea id="comment" name="comment" required style="width: 100%; padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px; height: 100px;"></textarea>
+                    </div>
+                    <button type="submit" style="background-color: #73946B; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer;">Enregistrer</button>
+                    <button type="button" onclick="closeCommentModal()" style="background-color: #ccc; color: #333; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer;">Annuler</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function toggleDropdown(id) {
+                const dropdown = document.getElementById('dropdown-' + id);
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            }
+
+            function openAddCommentModal() {
+                document.getElementById('modalTitle').textContent = 'Ajouter un commentaire';
+                document.getElementById('commentForm').action = '{{ path('app_habitat_comment_new') }}';
+                document.getElementById('commentId').value = '';
+                document.getElementById('habitat_id').value = '';
+                document.getElementById('comment').value = '';
+                document.getElementById('commentModal').style.display = 'block';
+            }
+
+            function openEditCommentModal(id, habitatId, comment) {
+                document.getElementById('modalTitle').textContent = 'Modifier un commentaire';
+                document.getElementById('commentForm').action = '/habitat-comments/edit/' + id;
+                document.getElementById('commentId').value = id;
+                document.getElementById('habitat_id').value = habitatId;
+                document.getElementById('comment').value = comment;
+                document.getElementById('commentModal').style.display = 'block';
+            }
+
+            function closeCommentModal() {
+                document.getElementById('commentModal').style.display = 'none';
+            }
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('[id^="dropdown-"]') && !event.target.matches('button[onclick^="toggleDropdown"]')) {
+                    document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
+                        dropdown.style.display = 'none';
+                    });
+                }
+            });
+        </script>
+    {% endif %}
+{% endblock %}

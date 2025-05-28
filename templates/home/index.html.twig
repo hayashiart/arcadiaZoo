@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Zoo Arcadia{% endblock %}
+
+{% block body %}
+    <!-- Section avec image de fond et texte -->
+    <div style="background-image: url('{{ asset('images/giraffe.jpg') }}'); background-size: cover; background-position: center; height: 400px; display: flex; justify-content: center; align-items: center;">
+        <h1 style="color: white; font-family: 'Belanosima', sans-serif; font-size: 48px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">ARCADIA ZOO</h1>
+    </div>
+
+    <!-- Texte d'accueil -->
+    <div style="background-color: white; padding: 40px; text-align: center;">
+        <h2 style="font-family: 'Belanosima', sans-serif; font-size: 36px; margin: 0;">Bienvenue au Zoo Arcadia !</h2>
+        <p style="font-family: 'Belanosima', sans-serif; font-size: 18px; color: #333;">Plongez dans un univers où la nature s’éveille ! Rencontrez des animaux extraordinaires, des lions majestueux aux pandas adorables, dans des habitats conçus pour leur bonheur.</p>
+    </div>
+
+    <!-- Images des habitats à 400px -->
+    <div style="display: flex; justify-content: center; gap: 20px; padding: 40px; background-color: white;">
+        <!-- Forêt -->
+        <div style="position: relative; text-align: center;">
+            <img src="{{ asset('images/foretTropicale.jpeg') }}" alt="Forêt" style="width: 300px; height: 400px; object-fit: cover;">
+            <h3 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Belanosima', sans-serif; font-size: 24px; color: white; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">FORÊT</h3>
+        </div>
+        <!-- Savane -->
+        <div style="position: relative; text-align: center;">
+            <img src="{{ asset('images/savane.jpeg') }}" alt="Savane" style="width: 300px; height: 400px; object-fit: cover;">
+            <h3 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Belanosima', sans-serif; font-size: 24px; color: white; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">SAVANE</h3>
+            <a href="{{ path('app_habitats') }}" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #73946B; color: white; padding: 10px 20px; text-decoration: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px;">Découvrir</a>
+        </div>
+        <!-- Aquarium -->
+        <div style="position: relative; text-align: center;">
+            <img src="{{ asset('images/aquarium.jpeg') }}" alt="Aquarium" style="width: 300px; height: 400px; object-fit: cover;">
+            <h3 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Belanosima', sans-serif; font-size: 24px; color: white; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">AQUARIUM</h3>
+        </div>
+    </div>
+
+    <!-- Section texte : titre sur deux lignes -->
+    <div style="display: flex; justify-content: space-between; padding: 40px; background-color: white;">
+        <h2 style="font-family: 'Belanosima', sans-serif; font-size: 28px; color: #333; width: 50%; text-align: center; line-height: 1.4;">Protégeons ensemble<br>la planète !</h2>
+        <p style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; width: 50%; text-align: right;">Au Zoo Arcadia, chaque visite soutient nos efforts pour la conservation des espèces. Venez vivre une expérience unique et engagez-vous pour un avenir durable.</p>
+    </div>
+
+    <!-- Images d'animaux décalées -->
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 40px; background-color: white;">
+        <div style="position: relative; top: 0;">
+            <img src="{{ asset('images/birds.jpg') }}" alt="Oiseaux" style="width: 200px; height: 150px; object-fit: cover;">
+        </div>
+        <div style="position: relative; top: 50px;">
+            <img src="{{ asset('images/elephants.jpeg') }}" alt="Éléphants" style="width: 200px; height: 150px; object-fit: cover;">
+        </div>
+        <div style="position: relative; top: -30px;">
+            <img src="{{ asset('images/monkey.jpg') }}" alt="Singe" style="width: 200px; height: 150px; object-fit: cover;">
+        </div>
+        <div style="position: relative; top: 20px;">
+            <img src="{{ asset('images/ostrich.jpg') }}" alt="Autruche" style="width: 200px; height: 150px; object-fit: cover;">
+        </div>
+        <div style="position: relative; top: 70px;">
+            <img src="{{ asset('images/rhino.jpg') }}" alt="Rhinocéros" style="width: 200px; height: 150px; object-fit: cover;">
+        </div>
+        <div style="position: relative; top: 10px;">
+            <img src="{{ asset('images/giraffe.jpg') }}" alt="Girafe" style="width: 200px; height: 150px; object-fit: cover;">
+        </div>
+    </div>
+
+    <!-- Section avis des visiteurs -->
+    <div style="background-color: white; padding: 40px; text-align: center;">
+        <h2 style="font-family: 'Belanosima', sans-serif; font-size: 28px; color: #333; margin-bottom: 20px;">Avis des visiteurs</h2>
+        <!-- Conteneur défilant pour les avis -->
+        <div style="display: flex; flex-wrap: nowrap; gap: 20px; padding: 20px; cursor: grab; user-select: none; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;" id="reviews-container">
+        <!-- Changement : masque la barre de défilement pour Chrome/Safari -->
+        <style>
+            #reviews-container::-webkit-scrollbar {
+            display: none;
+        }
+        </style>
+            {% for review in reviews %}
+                <!-- Carré pour chaque avis -->
+                <div style="flex: 0 0 250px; border: 2px solid black; background-color: white; border-radius: 10px; padding: 20px; text-align: left;">
+                    <h3 style="font-family: 'Belanosima', sans-serif; font-size: 20px; font-weight: bold; color: #D79E36; margin: 0 0 10px;">{{ review.pseudo }}</h3>
+                    <p style="font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; margin: 0;">{{ review.comment }}</p>
+                </div>
+            {% else %}
+                <p style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Aucun avis disponible pour le moment.</p>
+            {% endfor %}
+        </div>
+        <!-- Changement : Bouton pour ouvrir le popup -->
+        <button onclick="openReviewPopup()" style="background-color: #73946B; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; margin-top: 20px; cursor: pointer;">Écrire un avis</button>
+    </div>
+
+    <!-- Nouveau popup pour soumettre un avis -->
+    <div id="review-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000;">
+        <h2 style="font-family: 'Belanosima', sans-serif; font-size: 24px; color: #333; margin: 0 0 20px;">Votre avis</h2>
+        <form action="{{ path('app_review_submit') }}" method="post">
+            <div style="margin-bottom: 15px;">
+                <label for="pseudo" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Pseudo :</label>
+                <input type="text" id="pseudo" name="pseudo" required style="width: 100%; padding: 8px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="comment" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Commentaire :</label>
+                <textarea id="comment" name="comment" required style="width: 100%; height: 100px; padding: 8px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;"></textarea>
+            </div>
+            <div style="text-align: right;">
+                <button type="button" onclick="closeReviewPopup()" style="background-color: #ccc; color: #333; padding: 8px 16px; border: none; font-family: 'Belanosima', sans-serif; font-size: 14px; border-radius: 5px; cursor: pointer; margin-right: 10px;">Annuler</button>
+                <button type="submit" style="background-color: #73946B; color: white; padding: 8px 16px; border: none; font-family: 'Belanosima', sans-serif; font-size: 14px; border-radius: 5px; cursor: pointer;">Envoyer</button>
+            </div>
+        </form>
+    </div>
+    <!-- Fond sombre pour le popup -->
+    <div id="popup-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <!-- Script pour défilement par clic-glissé -->
+    <script>
+        const container = document.getElementById('reviews-container');
+        let isDragging = false;
+        let startX;
+        let scrollLeft;
+
+        container.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+            container.style.cursor = 'grabbing';
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDragging = false;
+            container.style.cursor = 'grab';
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDragging = false;
+            container.style.cursor = 'grab';
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 2;
+            container.scrollLeft = scrollLeft - walk;
+        });
+
+        // Nouveau script pour gérer le popup
+        function openReviewPopup() {
+            document.getElementById('review-popup').style.display = 'block';
+            document.getElementById('popup-overlay').style.display = 'block';
+        }
+
+        function closeReviewPopup() {
+            document.getElementById('review-popup').style.display = 'none';
+            document.getElementById('popup-overlay').style.display = 'none';
+        }
+    </script>
+{% endblock %}

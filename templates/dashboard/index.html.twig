@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - Arcadia Administration{% endblock %}
+
+{% block body %}
+    <!-- Changement : layout avec menu d’actions à gauche -->
+    <div style="background-color: #E7EDEE; min-height: 100vh; padding: 40px; display: flex;">
+        <!-- Menu d’actions à gauche -->
+        {{ include('partials/_sidebar.html.twig') }}
+        <!-- Partie principale -->
+        <div style="flex: 1; background-color: white; padding: 20px; border-radius: 5px;">
+    <h2 style="font-family: 'Belanosima', sans-serif; font-size: 24px; color: #333;">Animal consultation</h2>
+    {% for message in app.flashes('error') %}
+        <p style="color: red; font-family: 'Belanosima', sans-serif; font-size: 16px;">{{ message }}</p>
+    {% endfor %}
+    {% if animal_views %}
+        {% for animal in animal_views %}
+            <div style="margin-bottom: 15px;">
+                <span style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">{{ animal.animal_name }}</span>
+                <div style="width: 100%; background-color: #f0f0f0; border-radius: 5px; overflow: hidden;">
+                    <div style="width: {{ animal.views * 10 }}%; background-color: #73946B; height: 20px;"></div>
+                </div>
+                <span style="font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333;">{{ animal.views }} consultations</span>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Aucune donnée de consultation disponible.</p>
+    {% endif %}
+</div>
+    </div>
+{% endblock %}

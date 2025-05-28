@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des habitats - Arcadia Administration{% endblock %}
+
+{% block body %}
+    <div style="background-color: #E7EDEE; min-height: 100vh; padding: 40px; display: flex;">
+        {{ include('partials/_sidebar.html.twig') }}
+        <div style="flex: 1; background-color: white; padding: 20px; border-radius: 5px;">
+            <h2 style="font-family: 'Belanosima', sans-serif; font-size: 24px; color: #333;">Gestion des habitats</h2>
+            {% for message in app.flashes('success') %}
+                <p style="color: green; font-family: 'Belanosima', sans-serif; font-size: 16px;">{{ message }}</p>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <p style="color: red; font-family: 'Belanosima', sans-serif; font-size: 16px;">{{ message }}</p>
+            {% endfor %}
+            <button onclick="openAddHabitatModal()" style="background-color: #73946B; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer; margin-bottom: 20px;">Add Habitat</button>
+            <form action="{{ path('app_habitat_delete_multiple') }}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer les habitats sélectionnés ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_habitat_delete_multiple') }}">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;"><input type="checkbox" onclick="toggleCheckboxes(this)"></th>
+                            <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">ID</th>
+                            <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Nom</th>
+                            <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Description</th>
+                            <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Images</th>
+                            <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for habitat in habitats %}
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #ccc;"><input type="checkbox" name="habitat_ids[]" value="{{ habitat.id }}"></td>
+                                <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ habitat.id }}</td>
+                                <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ habitat.name }}</td>
+                                <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ habitat.description }}</td>
+                                <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">
+                                    {% for image in habitat.images %}
+                                        <img src="{{ asset(image) }}" alt="{{ habitat.name }}" style="height: 50px; margin-right: 5px;">
+                                    {% endfor %}
+                                </td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ccc;">
+                                    <div style="position: relative; display: inline-block;">
+                                        <button type="button" onclick="toggleDropdown({{ habitat.id }})" style="background: none; border: none; cursor: pointer; font-size: 18px;">...</button>
+                                        <div id="dropdown-{{ habitat.id }}" style="display: none; position: absolute; right: 0; background-color: white; border: 1px solid #ccc; border-radius: 5px; z-index: 1; min-width: 100px;">
+                                            <a href="#" onclick="openEditHabitatModal({{ habitat.id }}, '{{ habitat.name|escape('js') }}', '{{ habitat.description|escape('js') }}', '{{ habitat.images|join(',')|escape('js') }}')" style="display: block; padding: 8px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; text-decoration: none;">Edit</a>
+                                            <form action="{{ path('app_habitat_delete', {'id': habitat.id}) }}" method="post" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet habitat ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ habitat.id) }}">
+                                                <button type="submit" style="display: block; padding: 8px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; background: none; border: none; cursor: pointer; width: 100%; text-align: left;">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" style="background-color: #ff4444; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 20px;">Supprimer sélectionnés</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup pour ajouter/modifier un habitat -->
+    <div id="habitatModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="background-color: white; width: 400px; margin: 100px auto; padding: 20px; border-radius: 5px;">
+            <h3 id="modalTitle" style="font-family: 'Belanosima', sans-serif; font-size: 20px; color: #333;">Ajouter un habitat</h3>
+            <form id="habitatForm" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="habitat_id" id="habitatId">
+    <div style="margin-bottom: 15px;">
+        <label for="name" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Nom :</label>
+        <input type="text" id="name" name="name" required style="width: 100%; padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label for="description" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Description :</label>
+        <textarea id="description" name="description" required style="width: 100%; padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px; height: 100px;"></textarea>
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label for="images" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Image :</label>
+        <input type="file" id="images" name="images[]" accept="image/*" style="width: 100%; padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+    </div>
+    <button type="submit" style="background-color: #73946B; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer;">Enregistrer</button>
+    <button type="button" onclick="closeHabitatModal()" style="background-color: #ccc; color: #333; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer;">Annuler</button>
+</form>
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById('dropdown-' + id);
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleCheckboxes(source) {
+            const checkboxes = document.querySelectorAll('input[name="habitat_ids[]"]');
+            checkboxes.forEach(checkbox => checkbox.checked = source.checked);
+        }
+
+        function openAddHabitatModal() {
+            document.getElementById('modalTitle').textContent = 'Ajouter un habitat';
+            document.getElementById('habitatForm').action = '{{ path('app_habitat_create') }}';
+            document.getElementById('habitatId').value = '';
+            document.getElementById('name').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('images').value = '';
+            document.getElementById('habitatModal').style.display = 'block';
+        }
+
+        function openEditHabitatModal(id, name, description, images) {
+            document.getElementById('modalTitle').textContent = 'Modifier un habitat';
+            document.getElementById('habitatForm').action = '/habitats/edit/' + id;
+            document.getElementById('habitatId').value = id;
+            document.getElementById('name').value = name;
+            document.getElementById('description').value = description;
+            document.getElementById('images').value = images;
+            document.getElementById('habitatModal').style.display = 'block';
+        }
+
+        function closeHabitatModal() {
+            document.getElementById('habitatModal').style.display = 'none';
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('[id^="dropdown-"]') && !event.target.matches('button[onclick^="toggleDropdown"]')) {
+                document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+    </script>
+{% endblock %}

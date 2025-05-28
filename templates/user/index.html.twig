@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs - Arcadia Administration{% endblock %}
+
+{% block body %}
+    <div style="background-color: #E7EDEE; min-height: 100vh; padding: 40px; display: flex;">
+        <!-- Menu d’actions à gauche -->
+        {{ include('partials/_sidebar.html.twig') }}
+        <!-- Partie principale -->
+        <div style="flex: 1; background-color: white; padding: 20px; border-radius: 5px;">
+            <h2 style="font-family: 'Belanosima', sans-serif; font-size: 24px; color: #333;">Gestion des utilisateurs</h2>
+            {% for message in app.flashes('success') %}
+                <p style="color: green; font-family: 'Belanosima', sans-serif; font-size: 16px;">{{ message }}</p>
+            {% endfor %}
+            {% for message in app.flashes('error') %}
+                <p style="color: red; font-family: 'Belanosima', sans-serif; font-size: 16px;">{{ message }}</p>
+            {% endfor %}
+            <button onclick="openAddUserModal()" style="background-color: #73946B; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer; margin-bottom: 20px;">Add User</button>
+            <form action="{{ path('app_user_delete_multiple') }}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer les utilisateurs sélectionnés ?');">
+   <input type="hidden" name="_token" value="{{ csrf_token('delete_multiple') }}">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;"><input type="checkbox" onclick="toggleCheckboxes(this)"></th>
+                <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">ID</th>
+                <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Email</th>
+                <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Rôle</th>
+                <th style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333; border-bottom: 1px solid #ccc;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #ccc;"><input type="checkbox" name="user_ids[]" value="{{ user.id }}"></td>
+                    <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ user.id }}</td>
+                    <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">{{ user.email }}</td>
+                    <td style="padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; border-bottom: 1px solid #ccc;">
+                        {{ user.roles[0]|default('')|replace({'ROLE_': ''})|lower|capitalize }}
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ccc;">
+                        <div style="position: relative; display: inline-block;">
+                            <button type="button" onclick="toggleDropdown({{ user.id }})" style="background: none; border: none; cursor: pointer; font-size: 18px;">...</button>
+                            <div id="dropdown-{{ user.id }}" style="display: none; position: absolute; right: 0; background-color: white; border: 1px solid #ccc; border-radius: 5px; z-index: 1; min-width: 100px;">
+                                <a href="#" onclick="openEditUserModal({{ user.id }}, '{{ user.email }}', '{{ user.roles[0]|default('') }}')" style="display: block; padding: 8px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; text-decoration: none;">Edit</a>
+                                <form action="{{ path('app_user_delete', {'id': user.id}) }}" method="post" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?');">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                    <button type="submit" style="display: block; padding: 8px; font-family: 'Belanosima', sans-serif; font-size: 14px; color: #333; background: none; border: none; cursor: pointer; width: 100%; text-align: left;">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" style="background-color: #ff4444; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 20px;">Supprimer sélectionnés</button>
+</form>
+        </div>
+    </div>
+
+    <!-- Popup pour ajouter/modifier un utilisateur -->
+    <div id="userModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="background-color: white; width: 400px; margin: 100px auto; padding: 20px; border-radius: 5px;">
+            <h3 id="modalTitle" style="font-family: 'Belanosima', sans-serif; font-size: 20px; color: #333;">Ajouter un utilisateur</h3>
+            <form id="userForm" method="post">
+                <input type="hidden" name="user_id" id="userId">
+                <div style="margin-bottom: 15px;">
+                    <label for="email" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Email :</label>
+                    <input type="email" id="email" name="email" required style="width: 100%; padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="role" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Rôle :</label>
+                    <select id="role" name="role" required style="width: 100%; padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+                        <option value="ROLE_ADMIN">Admin</option>
+                        <option value="ROLE_VET">Vétérinaire</option>
+                        <option value="ROLE_EMPLOYEE">Employé</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;" id="passwordField">
+                    <label for="password" style="font-family: 'Belanosima', sans-serif; font-size: 16px; color: #333;">Mot de passe :</label>
+                    <input type="password" id="password" name="password" style="width: 100%; padding: 10px; font-family: 'Belanosima', sans-serif; font-size: 14px; border: 1px solid #ccc; border-radius: 5px;">
+                </div>
+                <button type="submit" style="background-color: #73946B; color: white; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer;">Enregistrer</button>
+                <button type="button" onclick="closeUserModal()" style="background-color: #ccc; color: #333; padding: 10px 20px; border: none; font-family: 'Belanosima', sans-serif; font-size: 16px; border-radius: 5px; cursor: pointer;">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById('dropdown-' + id);
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleCheckboxes(source) {
+            const checkboxes = document.querySelectorAll('input[name="user_ids[]"]');
+            checkboxes.forEach(checkbox => checkbox.checked = source.checked);
+        }
+
+        function openAddUserModal() {
+            document.getElementById('modalTitle').textContent = 'Ajouter un utilisateur';
+            document.getElementById('userForm').action = '{{ path('app_user_new') }}';
+            document.getElementById('userId').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('role').value = 'ROLE_EMPLOYEE';
+            document.getElementById('passwordField').style.display = 'block';
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function openEditUserModal(id, email, role) {
+            document.getElementById('modalTitle').textContent = 'Modifier un utilisateur';
+            document.getElementById('userForm').action = '/users/' + id + '/edit';
+            document.getElementById('userId').value = id;
+            document.getElementById('email').value = email;
+            document.getElementById('role').value = role;
+            document.getElementById('passwordField').style.display = 'none';
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // Fermer les dropdowns quand on clique ailleurs
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('[id^="dropdown-"]') && !event.target.matches('button[onclick^="toggleDropdown"]')) {
+                document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+    </script>
+{% endblock %}
